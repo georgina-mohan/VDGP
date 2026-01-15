@@ -1,1 +1,1 @@
-# Visual-Discomfort-General-Population
+# Visual Discomfort: General Population (VDGP)
