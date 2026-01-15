@@ -255,7 +255,7 @@ R.allframetimes = cell(1,E.ntrials);
 R.subj = E.ID;
 
 %% --- COLOUR STIMULI ---
-[textureHandles2, angle2, gratingwidth_pix2, radius2, sf_cpp2, phase2, colourPairs, sigma2, imgMatrix2, soothtex2, tVals2, masktex2, dRectM2, gratingwidth_deg, pixperdeg] = ColourStimuli3(window, xDim, yDim, display);
+[textureHandles2, angle2, gratingwidth_pix2, radius2, sf_cpp2, phase2, colourPairs, sigma2, imgMatrix2, soothtex2, tVals2, masktex2, dRectM2, gratingwidth_deg, pixperdeg] = ColourStimuli(window, xDim, yDim, display);
 phase_cycle2 = [zeros(flickerTimeFrames,1); repmat( 180, flickerTimeFrames,1)];
 phase_cycle_expanded2 = repmat(phase_cycle2, ceil(presTimeFrames/length(phase_cycle2)),1);
 
