@@ -30,7 +30,7 @@ Screen('Preference', 'VBLEndlineOverride', vtotal); % VBL fix for custom resolut
 % 2 = eyetracking only
 % 3 = full set-up (EEG + eyetracking)
 % 4 = troubleshooting - small screen + ratings only
-inLab = 0;
+inLab = 3;
 
 % -- SET PATH -- 
 E.exptpath = 'C:\Users\gxm449\Documents\PTb\Data'; % default path
@@ -100,8 +100,8 @@ applyGammaCorrection_APL(1, Gamma.gammaTable, 0); % apply gamma correction
 display.CSFdist = display.dist*10; % save distance in mm (CSF expects mm)
 
 % -- TASK PARAMETERS --
-trialsPerBlock = 5;
-blockCount = 1;
+trialsPerBlock = 25;
+blockCount = 4;
 gaborSize = 7; % must be integer
 interStimulusInterval = 1;
 orientation = 90;
@@ -277,7 +277,7 @@ allValues2(:, 3) = [41, 42, 43, 44, 51, 52, 53, 54, 61, 62, 63, 64];
 % --- TRIAL STRUCTURE ---
 E.nconds2 = 4; % colour pairs
 E.nlevels2 = 3; % spatial frequencies
-E.ntrialsperblock2 = 30; % how many trials in each if trial== 30+1 || trial == 60+1 || trial == 90+1 || trial == 120+1 || trial == 150+1block
+E.ntrialsperblock2 = 24; % how many trials in each if trial== 30+1 || trial == 60+1 || trial == 90+1 || trial == 120+1 || trial == 150+1block
 E.stimuli2 = E.nconds2 * E.nlevels2;
 E.nrepetitions2 = 1;
 E.ntrials2 = E.stimuli2*E.nrepetitions2;
@@ -342,14 +342,14 @@ R.subj2 = E.ID;
 % LAB 2: COM3 & COM6 -> current in COM6 (I think???)
 
 % 2. Define correct port number (don't include "COM" part)
-port_nb = 3; 
-
-% 3. Open the port:
-if inLab == 1 || inLab == 3
-    port_handle = open_ns_port(port_nb);
-else
-    port_handle = [];
-end
+% port_nb = 3; 
+% 
+% % 3. Open the port:
+% if inLab == 1 || inLab == 3
+%     port_handle = open_ns_port(port_nb);
+% else
+%     port_handle = [];
+% end
 
 % s = serialport("COM6",9600); % alternative way to set serialport
 % delete(instrfindall) % manually close serial port when having code issues
@@ -659,15 +659,15 @@ if isfield(R, 'rt2') && isfield(R, 'response2')
 end
 
 % Photodiode results
-participantID = E.IDstr;
-saveDir = fullfile(pwd, 'Photodiode');
-
-if ~exist(saveDir, 'dir')
-    mkdir(saveDir);
-end
-
-filename = fullfile(saveDir, ['pd_', participantID, '.mat']);
-save(filename, 'pd');  % Save the structure
+% participantID = E.IDstr;
+% saveDir = fullfile(pwd, 'Photodiode');
+% 
+% if ~exist(saveDir, 'dir')
+%     mkdir(saveDir);
+% end
+% 
+% filename = fullfile(saveDir, ['pd_', participantID, '.mat']);
+% save(filename, 'pd');  % Save the structure
 
 
 %% --- EXTRA ---

@@ -93,8 +93,8 @@ greyColEyeTracker = [greyCol, greyCol, greyCol];
         sf2 = R.trialrand2(T, 1);
         colour = R.trialrand2(T, 2);
 
-        % Progress update - not working/showing text*****
-        if T == 30+1 || T == 60+1 || T == 90+1 || T == 120+1 % with 10 repetitions
+        % Progress update
+        if T == 24+1 || T == 48+1 || T == 72+1 || T == 96+1 || T == 120+1 % with 10 repetitions
         % if T == 12+1 || T == 24+1 || T == 36+1 || T == 48+1 % with 5
             blockcomplete2 = blockcomplete2 + 1;
             % 3 pauses divide block into quarters
