@@ -1,4 +1,4 @@
-function [R] = runContrastBlock(R, E, window, windowRect, keys, fname_contrast, xCenter, yCenter, ST, imtextures, angle, sigma, black, greyBW, white, ncycles, flickerTimeFrames, ifi, allValues, inLab, port_handle, pahandle, dRectM, rect, interest, el)
+function [R] = runContrastBlock(R, E, window, windowRect, keys, fname_contrast, xCenter, yCenter, ST, imtextures, angle, sigma, black, greyBW, white, ncycles, flickerTimeFrames, ifi, allValues, inLab, pahandle, dRectM, rect, interest, el)
 %% Georgina Mohan 
 % 18/09/2025
 % SPIN Lab 
@@ -166,10 +166,10 @@ greyBWEyeTracker = [greyBW, greyBW, greyBW];
 
             if cycle == 1
                 R.eventTime(T) = GetSecs;
-                if inLab == 1 || inLab == 3
-                    trigger_val = R.trialrand(T, 3); % (T, 3) = stimulus label
-                    send_ns_trigger(trigger_val, port_handle);
-                end
+%                 if inLab == 1 || inLab == 3
+%                     trigger_val = R.trialrand(T, 3); % (T, 3) = stimulus label
+%                     send_ns_trigger(trigger_val, port_handle);
+%                 end
                 if inLab == 2 || inLab == 3
                     Eyelink('Message', 'StimOn');
                 end
@@ -247,10 +247,10 @@ greyBWEyeTracker = [greyBW, greyBW, greyBW];
 
         toc % - can do this to check you have stimulus duration you expect
 
-        if inLab == 1 || inLab == 3
-            trigger_val = 100 + R.trialrand(T, 3);
-            send_ns_trigger(trigger_val, port_handle);
-        end
+%         if inLab == 1 || inLab == 3
+%             trigger_val = 100 + R.trialrand(T, 3);
+%             send_ns_trigger(trigger_val, port_handle);
+%         end
         if inLab == 2 || inLab == 3
             Eyelink('Message', 'StimOff');
         end

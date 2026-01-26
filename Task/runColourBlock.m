@@ -1,4 +1,4 @@
-function [R] = runColourBlock(R, E, window, windowRect, keys, fname_colour, xCenter, yCenter, ST, imtextures2, angle2, sigma2, black, greyCol, white, ncycles, flickerTimeFrames, ifi, allValues2, inLab, port_handle, pahandle, dRectM2, rect, interest, el, gratingwidth_deg, pixperdeg)
+function [R] = runColourBlock(R, E, window, windowRect, keys, fname_colour, xCenter, yCenter, ST, imtextures2, angle2, sigma2, black, greyCol, white, ncycles, flickerTimeFrames, ifi, allValues2, inLab, pahandle, dRectM2, rect, interest, el, gratingwidth_deg, pixperdeg)
 %% Georgina Mohan 
 % 18/09/2025
 % SPIN Lab 
@@ -204,10 +204,10 @@ greyColEyeTracker = [greyCol, greyCol, greyCol];
 
             if cycle == 1
                 R.eventTime2(T) = GetSecs;
-                if inLab == 1 || inLab == 3
-                    trigger_val = R.trialrand2(T, 3); % (T, 3) = stimulus label
-                    send_ns_trigger(trigger_val, port_handle);
-                end
+%                 if inLab == 1 || inLab == 3
+%                     trigger_val = R.trialrand2(T, 3); % (T, 3) = stimulus label
+%                     send_ns_trigger(trigger_val, port_handle);
+%                 end
                 if inLab == 2 || inLab == 3
                     Eyelink('Message', 'StimOn');
                 end
@@ -272,10 +272,10 @@ greyColEyeTracker = [greyCol, greyCol, greyCol];
             end
         end
 
-        if inLab == 1 || inLab == 3 % to check
-            trigger_val = 100 + R.trialrand2(T, 3);
-            send_ns_trigger(trigger_val, port_handle);
-        end
+%         if inLab == 1 || inLab == 3 % to check
+%             trigger_val = 100 + R.trialrand2(T, 3);
+%             send_ns_trigger(trigger_val, port_handle);
+%         end
         if inLab == 2 || inLab == 3
             Eyelink('Message', 'StimOff');
         end

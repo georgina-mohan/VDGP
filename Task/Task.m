@@ -30,12 +30,12 @@ Screen('Preference', 'VBLEndlineOverride', vtotal); % VBL fix for custom resolut
 % 2 = eyetracking only
 % 3 = full set-up (EEG + eyetracking)
 % 4 = troubleshooting - small screen + ratings only
-inLab = 3;
+inLab = 0;
 
 % -- SET PATH -- 
-E.exptpath = 'C:\Users\gxm449\Documents\PTb\Data'; % default path
-pwd = 'C:\Users\gxm449\Documents\PTb\Data'; % set directory
-addpath 'C:\Users\gxm449\Documents\PTb\Task'
+E.exptpath = 'C:\Users\gxm449\Documents\Data\VDGP'; % default path
+pwd = 'C:\Users\gxm449\Documents\Data\VDGP'; % set directory
+addpath 'C:\Users\gxm449\Documents\VDGP\Task'
 addpath 'C:\Users\gxm449\Documents\PsyCalibrator-main\PsyCalibrator'
 
 % -- PARTICIPANT ID --
@@ -96,34 +96,34 @@ yDim = display.tmp.height;
 load('Gamma_fitted.mat') % must use Gamma_fitted.mat NOT Gamma.m
 applyGammaCorrection_APL(1, Gamma.gammaTable, 0); % apply gamma correction
 
-% --- CONTRAST SENSITIVITY TEST ---
-display.CSFdist = display.dist*10; % save distance in mm (CSF expects mm)
-
-% -- TASK PARAMETERS --
-trialsPerBlock = 25;
-blockCount = 4;
-gaborSize = 7; % must be integer
-interStimulusInterval = 1;
-orientation = 90;
-
-% -- OUTPUT FILE --
-csfSubfolder = fullfile(E.exptpath, 'CSF');
-if ~exist(csfSubfolder, 'dir') % make sure folder exists
-    mkdir(csfSubfolder);
-end
-outputFile = fullfile(csfSubfolder, 'QuickCSF-results.csv'); % add filename to folder path
-
-% -- PYTHON COMMAND --
-% cmd = 'python -m QuickCSF.app --help';
-% system([py37 ' -m QuickCSF.app --help'])
-py37 = '"C:\Users\gxm449\AppData\Local\Programs\Python\Python37\python.exe"';
-cmd = sprintf('%s -m QuickCSF.app --sessionID %s --distance_mm %.1f --interStimulusInterval %.1f --trialsPerBlock %d --blockCount %d --size %d --orientation %d --outputFile "%s"', ...
-    py37, E.IDstr, display.CSFdist, interStimulusInterval, trialsPerBlock, blockCount, gaborSize, orientation, outputFile);
-
-% cmd = sprintf('python -m QuickCSF.app --sessionID %s --distance_mm %.1f --interStimulusInterval %.1f --trialsPerBlock %d --blockCount %d --size %d --orientation %d --outputFile "%s"', ...
-%     E.IDstr, display.CSFdist, interStimulusInterval, trialsPerBlock, blockCount, gaborSize, orientation, outputFile);
-
-status = system(cmd);  % Or: dos(cmd);
+%% --- CONTRAST SENSITIVITY TEST ---
+% display.CSFdist = display.dist*10; % save distance in mm (CSF expects mm)
+% 
+% % -- TASK PARAMETERS --
+% trialsPerBlock = 25;
+% blockCount = 4;
+% gaborSize = 7; % must be integer
+% interStimulusInterval = 1;
+% orientation = 90;
+% 
+% % -- OUTPUT FILE --
+% csfSubfolder = fullfile(E.exptpath, 'CSF');
+% if ~exist(csfSubfolder, 'dir') % make sure folder exists
+%     mkdir(csfSubfolder);
+% end
+% outputFile = fullfile(csfSubfolder, 'QuickCSF-results.csv'); % add filename to folder path
+% 
+% % -- PYTHON COMMAND --
+% % cmd = 'python -m QuickCSF.app --help';
+% % system([py37 ' -m QuickCSF.app --help'])
+% py37 = '"C:\Users\gxm449\AppData\Local\Programs\Python\Python37\python.exe"';
+% cmd = sprintf('%s -m QuickCSF.app --sessionID %s --distance_mm %.1f --interStimulusInterval %.1f --trialsPerBlock %d --blockCount %d --size %d --orientation %d --outputFile "%s"', ...
+%     py37, E.IDstr, display.CSFdist, interStimulusInterval, trialsPerBlock, blockCount, gaborSize, orientation, outputFile);
+% 
+% % cmd = sprintf('python -m QuickCSF.app --sessionID %s --distance_mm %.1f --interStimulusInterval %.1f --trialsPerBlock %d --blockCount %d --size %d --orientation %d --outputFile "%s"', ...
+% %     E.IDstr, display.CSFdist, interStimulusInterval, trialsPerBlock, blockCount, gaborSize, orientation, outputFile);
+% 
+% status = system(cmd);  % Or: dos(cmd);
 
 %% --- STIMULUS PARAMETERS ---
 ST.duration = 5;   % trial duration (s)
@@ -494,7 +494,7 @@ RestrictKeysForKbCheck(keys.space);
 if isEven
     % try
     % -- CONTRAST BLOCK --
-    [R] = runContrastBlock(R, E, window, windowRect, keys, fname_contrast, xCenter, yCenter, ST, imtextures, angle, sigma, black, greyBW, white, ncycles, flickerTimeFrames, ifi, allValues, inLab, port_handle, pahandle, dRectM, rect, interest, el);
+    [R] = runContrastBlock(R, E, window, windowRect, keys, fname_contrast, xCenter, yCenter, ST, imtextures, angle, sigma, black, greyBW, white, ncycles, flickerTimeFrames, ifi, allValues, inLab, pahandle, dRectM, rect, interest, el);
 
     % Transition to second task message
     ContrastBlockFinishedTxt = 'You have finished the black and white task. Please take a break, and when you are ready, please press SPACE to start eye-tracking calibration for the second task.';
@@ -533,12 +533,12 @@ if isEven
 
     % -- COLOUR BLOCK --
     if Screen('Windows')
-        [R] = runColourBlock(R, E, window, windowRect, keys, fname_colour, xCenter, yCenter, ST, imtextures2, angle2, sigma2, black, greyCol, white, ncycles, flickerTimeFrames, ifi, allValues2, inLab, port_handle, pahandle, dRectM2, rect, interest, el, gratingwidth_deg, pixperdeg);
+        [R] = runColourBlock(R, E, window, windowRect, keys, fname_colour, xCenter, yCenter, ST, imtextures2, angle2, sigma2, black, greyCol, white, ncycles, flickerTimeFrames, ifi, allValues2, inLab, pahandle, dRectM2, rect, interest, el, gratingwidth_deg, pixperdeg);
     end
 
 else
     % -- COLOUR BLOCK --
-    [R] = runColourBlock(R, E, window, windowRect, keys, fname_colour, xCenter, yCenter, ST, imtextures2, angle2, sigma2, black, greyCol, white, ncycles, flickerTimeFrames, ifi, allValues2, inLab, port_handle, pahandle, dRectM2, rect, interest, el, gratingwidth_deg, pixperdeg);
+    [R] = runColourBlock(R, E, window, windowRect, keys, fname_colour, xCenter, yCenter, ST, imtextures2, angle2, sigma2, black, greyCol, white, ncycles, flickerTimeFrames, ifi, allValues2, inLab, pahandle, dRectM2, rect, interest, el, gratingwidth_deg, pixperdeg);
 
     % transition to second task
     ColourBlockFinishedTxt = 'You have finished the colour task. Please take a break, and when you are ready, please press SPACE to start eye-tracking calibration for the second task. ';
@@ -573,7 +573,7 @@ else
 
     % -- CONTRAST BLOCK --
     if Screen('Windows')
-        [R] = runContrastBlock(R, E, window, windowRect, keys, fname_contrast, xCenter, yCenter, ST, imtextures, angle, sigma, black, greyBW, white, ncycles, flickerTimeFrames, ifi, allValues, inLab, port_handle, pahandle, dRectM, rect, interest, el);
+        [R] = runContrastBlock(R, E, window, windowRect, keys, fname_contrast, xCenter, yCenter, ST, imtextures, angle, sigma, black, greyBW, white, ncycles, flickerTimeFrames, ifi, allValues, inLab, pahandle, dRectM, rect, interest, el);
     end
 end
 
@@ -588,9 +588,9 @@ if Screen('Windows')
 end
 
 %% --- CLOSE EEG PORT ---
-if inLab == 1 || inLab == 3
-    close_ns_port(port_handle);
-end
+% if inLab == 1 || inLab == 3
+%     close_ns_port(port_handle);
+% end
 
 %% --- SAVE EDF FILE ---
 if inLab == 2 || inLab == 3
@@ -604,7 +604,7 @@ if inLab == 2 || inLab == 3
     try 
         fprintf('Receiving data file ''%s''\n', edfFile );
 
-        targetFolder = fullfile('C:\Users\gxm449\Documents\PTb\Data\EyeTracking');
+        targetFolder = fullfile('C:\Users\gxm449\Documents\Data\VDGP\EyeTracking');
 
         if ~exist(targetFolder, 'dir')
             mkdir(targetFolder);
