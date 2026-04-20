@@ -14,17 +14,17 @@
 %
 % Notes:
 % - for ANT system (.cnt files)
-% - uses EEGLAB, ICLabel and freqtag toolbox
+% - uses EEGLAB, ICLabel, TBT master, and freqtag toolbox
 
 clear all
 close all
 
 %% import data
 % set current directory
-cd 'C:\Users\Georg\OneDrive - University of Birmingham\VDGP\Data\Raw\EEG';
+cd 'C:\Users\gxm449\OneDrive - University of Birmingham\VDGP\Data\Raw\EEG';
 
 ID = input('\nSubject ID? ', 's'); % participant ID number 
-dataPath = ['C:\Users\Georg\OneDrive - University of Birmingham\VDGP\Data\Raw\EEG\VDGP_' ID '.cnt']; % where EEG files will be extracted from
+dataPath = ['C:\Users\gxm449\OneDrive - University of Birmingham\VDGP\Data\Raw\EEG\VDGP_' ID '.cnt']; % where EEG files will be extracted from
 
 % import EEG
 EEG = pop_loadeep_v4(dataPath);
@@ -35,6 +35,9 @@ EEG = pop_chanedit(EEG, 'lookup','standard_1005.elc'); % add channel locs
 %% filter
 EEG = pop_eegfiltnew(EEG, 'locutoff', 0.01); % high pass
 EEG = pop_eegfiltnew(EEG, 'hicutoff', 30); % low pass
+
+% add notch filter (45 - 55 Hz) **differs from pre-reg**
+EEG = pop_eegfiltnew(EEG, 'locutoff', 45, 'hicutoff', 55, 'revfilt', 1);
 
 %% epoch 
 % epoch all photodiode triggers
@@ -84,7 +87,7 @@ pop_eegplot(EEG, 1, 1, 1);
 % will load the behavioural rating files and use them to assign the condition to the epoch (important for FFT later)
 
 % load & order behavioural data
-cd 'C:\Users\Georg\OneDrive - University of Birmingham\VDGP\Data\Raw\Ratings'; % change directory
+cd 'C:\Users\gxm449\OneDrive - University of Birmingham\VDGP\Data\Raw\Ratings'; % change directory
 colour   = readtable(fullfile('Colour',   [ID '_Colour_.csv'])); % import data
 contrast = readtable(fullfile('Contrast', [ID '_Contrast_.csv'])); 
 colour   = colour(:,   [4 7]); % keep relevant info only (condition & rating)
@@ -216,7 +219,7 @@ EEG = pop_TBT(EEG, ...
 %% save
 EEG = pop_saveset(EEG, ...
     'filename', sprintf('%s_cleaned.set', ID),...
-    'filepath', 'C:\Users\Georg\OneDrive - University of Birmingham\VDGP\Data\Processed\cleanedDatasets');
+    'filepath', 'C:\Users\gxm449\OneDrive - University of Birmingham\VDGP\Data\Processed\cleanedDatasets');
 
 %% extract occipital
 EEG = pop_select(EEG, 'channel', {'O1', 'O2'}); 
@@ -308,5 +311,5 @@ conditionTrigger = str2double(string(triggerlabels))';
 EEGAverage = table(participantID, conditionTrigger, ampmatrix', SNRdb_matrix',...
     'VariableNames', {'Participant', 'Trigger', 'Amplitude', 'SNR'});
 
-savePath = 'C:\Users\Georg\OneDrive - University of Birmingham\VDGP\Data\Processed\EEG\';
+savePath = 'C:\Users\gxm449\OneDrive - University of Birmingham\VDGP\Data\Processed\EEG\';
 writetable(EEGAverage, fullfile(savePath, [ID '_average.xlsx']));
