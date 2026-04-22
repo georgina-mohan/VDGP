@@ -180,7 +180,7 @@ end
 
 EEG3 = pop_eegfiltnew(EEG, 'locutoff', 1); % using a more stringent high-pass filter = better quality ICA
  
-EEG = pop_runica(EEG3, ... 
+EEG3 = pop_runica(EEG3, ... 
     'icatype', 'runica', ...
     'extended', 1);
 
@@ -198,7 +198,7 @@ pop_viewprops(EEG3, 0, 1:18, ...
     {'freqrange', [2 50]});
 
 % IClabel:
-EEG = pop_iclabel(EEG3, 'default'); % flags components (1 = brain; 2 = muscle; 3 = eye; 4 = heart; 5 = line noise; 6 = other)
+EEG3 = pop_iclabel(EEG3, 'default'); % flags components (1 = brain; 2 = muscle; 3 = eye; 4 = heart; 5 = line noise; 6 = other)
 
 % find components with more than 90% probability of being an artifact
 artifactComponents = find(...
