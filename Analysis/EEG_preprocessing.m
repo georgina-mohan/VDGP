@@ -42,6 +42,11 @@ EEG = pop_eegfiltnew(EEG, 'locutoff', 45, 'hicutoff', 55, 'revfilt', 1);
 EEG = eeg_checkset( EEG );
 pop_eegplot(EEG, 1, 1, 1);
 
+% save
+EEG = pop_saveset(EEG, ...
+    'filename', sprintf('%s_filtered.set', ID),...
+    'filepath', 'C:\Users\gxm449\OneDrive - University of Birmingham\VDGP\Data\Processed\cleanedDatasets');
+
 %% epoch 
 % epoch all photodiode triggers
 EEG = pop_epoch(EEG, ...
@@ -224,6 +229,11 @@ EEG3 = pop_eegfiltnew(EEG, 'locutoff', 1); % using a more stringent high-pass fi
 EEG3 = pop_runica(EEG3, ... 
     'icatype', 'runica', ...
     'extended', 1);
+
+% save
+EEG = pop_saveset(EEG, ...
+    'filename', sprintf('%s_ICA.set', ID),...
+    'filepath', 'C:\Users\gxm449\OneDrive - University of Birmingham\VDGP\Data\Processed\cleanedDatasets');
 
 % clean ICA
 % Using a semi-automatic approach
