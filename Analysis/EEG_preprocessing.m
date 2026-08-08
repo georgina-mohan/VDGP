@@ -39,6 +39,9 @@ EEG = pop_eegfiltnew(EEG, 'hicutoff', 30); % low pass
 % add notch filter (45 - 55 Hz) **differs from pre-reg**
 EEG = pop_eegfiltnew(EEG, 'locutoff', 45, 'hicutoff', 55, 'revfilt', 1);
 
+EEG = eeg_checkset( EEG );
+pop_eegplot(EEG, 1, 1, 1);
+
 %% epoch 
 % epoch all photodiode triggers
 EEG = pop_epoch(EEG, ...
@@ -76,9 +79,19 @@ EEG = pop_epoch(EEG, ...
     'newname', 'EEProbe continuous data epochs', ...
     'epochinfo', 'yes');
 
-% plot
-EEG = eeg_checkset( EEG );
-pop_eegplot(EEG, 1, 1, 1);
+% plot (epoch - one line per channel)
+ERP = mean(EEG.data, 3);
+figure(1);
+plot(EEG.times, ERP, 'LineWidth',1);
+xlim([-500 5000])
+ylim([-10 10])
+
+% plot (epoch - average across channels)
+ERP_allChannels = mean(ERP, 1);
+figure(2)
+plot(EEG.times, ERP_allChannels, 'LineWidth',2);
+xlim([-500 5000])
+ylim([-10 10])
 
 %% match epoch to stimulus condition
 % so far, the photodiode triggers show the start of each trial but we don't know what stimulus condition was shown. 
@@ -146,6 +159,20 @@ if ~isempty(badChanLabels)
     EEG = pop_select(EEG, 'nochannel', badChanLabels);
 end
 
+% plot (epoch - one line per channel)
+ERP = mean(EEG.data, 3);
+figure(1);
+plot(EEG.times, ERP, 'LineWidth',1);
+xlim([-500 5000])
+ylim([-10 10])
+
+% plot (epoch - average across channels)
+ERP_allChannels = mean(ERP, 1);
+figure(2)
+plot(EEG.times, ERP_allChannels, 'LineWidth',2);
+xlim([-500 5000])
+ylim([-10 10])
+
 %% reject very noisy epochs 
 % using a stricter high-pass filter (1 Hz) to identify bad epochs (+/- 200 µV) to reject epochs from original dataset
 
@@ -160,6 +187,20 @@ if ~isempty(badEpochs)
     EEG2 = pop_rejepoch(EEG2, badEpochs, 0);
     EEG = pop_rejepoch(EEG, badEpochs, 0);
 end
+
+% plot (epoch - one line per channel)
+ERP = mean(EEG.data, 3);
+figure(1);
+plot(EEG.times, ERP, 'LineWidth',1);
+xlim([-500 5000])
+ylim([-10 10])
+
+% plot (epoch - average across channels)
+ERP_allChannels = mean(ERP, 1);
+figure(2)
+plot(EEG.times, ERP_allChannels, 'LineWidth',2);
+xlim([-500 5000])
+ylim([-10 10])
 
 %% re-reference
 % Add back in reference channel (Cz)
@@ -184,7 +225,7 @@ EEG3 = pop_runica(EEG3, ...
     'icatype', 'runica', ...
     'extended', 1);
 
-%% clean ICA
+% clean ICA
 % Using a semi-automatic approach
 % 1. scalp topograpy and time course
 % 2. ICLabel to classify components
@@ -193,7 +234,10 @@ EEG3 = pop_runica(EEG3, ...
 pop_topoplot(EEG3, 0, 1:20, 'IC Maps', []);
 
 % time course
+figure;
 pop_eegplot(EEG3, 0, 1, 1:20); 
+
+figure;
 pop_viewprops(EEG3, 0, 1:18, ...
     {'freqrange', [2 50]});
 
@@ -221,6 +265,20 @@ EEG.icachansind = EEG3.icachansind;
 % remove components from original dataset
 EEG = pop_subcomp(EEG, badComponents, 0);
 
+% plot (epoch - one line per channel)
+ERP = mean(EEG.data, 3);
+figure(1);
+plot(EEG.times, ERP, 'LineWidth',1);
+xlim([-500 5000])
+ylim([-10 10])
+
+% plot (epoch - average across channels)
+ERP_allChannels = mean(ERP, 1);
+figure(2)
+plot(EEG.times, ERP_allChannels, 'LineWidth',2);
+xlim([-500 5000])
+ylim([-5 5])
+
 %% reject/interpolate bad channels (epoch-by-epoch)
 
 % temp high-pass filter
@@ -241,6 +299,20 @@ EEG = pop_TBT(EEG, ...
     4, ... % max number of bad channel per epoch/trial. If a trial has move than this number of bad channels, the epoch will be removed
     0.3, ... % max % bad epochs/trials per channel. If a channel is bad on more than this percent of the trials, the channel will be removed across the whole dataset.
     0); 
+
+% plot (epoch - one line per channel)
+ERP = mean(EEG.data, 3);
+figure(1);
+plot(EEG.times, ERP, 'LineWidth',1);
+xlim([-500 5000])
+ylim([-10 10])
+
+% plot (epoch - average across channels)
+ERP_allChannels = mean(ERP, 1);
+figure(2)
+plot(EEG.times, ERP_allChannels, 'LineWidth',2);
+xlim([-500 5000])
+ylim([-5 5])
 
 %% save
 EEG = pop_saveset(EEG, ...
@@ -294,6 +366,7 @@ endSamp = 5.5 * fs; % 5s * fs (500 Hz) = 2750 end sample rate (or 5500ms)
 
 ampmatrix = nan(1, length(triggerlabels));
 SNRdb_matrix = nan(1, length(triggerlabels));
+allAmp = cell(1, length(triggerlabels));
 
 for cond = 1:length(triggerlabels) 
 
@@ -318,6 +391,7 @@ for cond = 1:length(triggerlabels)
     % Extract amplitude and SNR
     amp_F1 = mean(amp(:, f1)); % average across O1 and O2
     ampmatrix(cond) = amp_F1; % extracting amp per condition
+    allAmp{cond} = amp;
 
     [SNRdb, SNRratio] = freqtag_simpleSNR(amp, [f1-3, f1-2, f1+2, f1+3]);
     SNRdb_matrix(cond) = mean(SNRdb(:, f1));
@@ -325,11 +399,21 @@ for cond = 1:length(triggerlabels)
     close all
 end
 
-% plot
-meanAmpAll = mean(amp, 1);   % average across epochs
-figure, plot(freqs, mean(meanAmpAll,1))
-xlabel('Frequency (Hz)'), ylabel('Amplitude (μV)')
+% plot (FFT average across all conditions)
+figure
+plot(freqs, mean(cat(3, allAmp{:}), 3))
+xlabel('Frequency (Hz)')
+ylabel('Amplitude (μV)')
 title('FFT spectrum')
+
+% plot (conditions seperately)
+for cond = 1:length(triggerlabels)
+    figure
+    plot(freqs, mean(allAmp{cond},1))
+    xlabel('Frequency (Hz)')
+    ylabel('Amplitude (μV)')
+    title(['FFT spectrum for ' triggerlabels{cond}])
+end
 
 %% save
 participantID = repmat({ID}, length(triggerlabels), 1); 
