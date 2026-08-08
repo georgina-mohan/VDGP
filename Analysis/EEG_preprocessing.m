@@ -119,13 +119,37 @@ end
 
 % remove trials with no behavioural response
 ratings(isnan(ratings.Rating), :) = []; 
-ratings.TrialNumber = (1:height(ratings))'; % also adding a trial number so I know which trials are removed after cleaning
+ratings.TrialNumber = (1:height(ratings))'; 
 
 % match condition to EEG epochs
 for i = 1:height(ratings)
     EEG.epoch(i).eventtype{1} = num2str(ratings.Trigger(i));
     j = EEG.epoch(i).event(1);
     EEG.event(j).type = num2str(ratings.Trigger(i));
+end
+
+% adding trial number to EEG epochs
+for i = 1:height(ratings)
+    j = EEG.epoch(i).event(1);
+    EEG.event(j).Trial = ratings.TrialNumber(i);
+    EEG.epoch(i).Trial = ratings.TrialNumber(i);
+end
+
+%% eye-tracking 
+% i am using the eye-tracking to clean trials where participants were not looking at the stimuli. 
+% adding now, but won't use it to clean until later
+
+cd 'C:\Users\gxm449\OneDrive - University of Birmingham\VDGP\Data\Processed\EyeTracking'; 
+eyeTracking = readtable(fullfile([ID '.csv'])); 
+eyeTracking.Trial = eyeTracking.TrialNumber;
+
+% eye-tracking has: Gaze_not_incl_NaN, Gaze_incl_NaN, Fix_insideROI, Fix_outsideROI
+% am adding all for now and will check impact on FFT
+for i = 1:height(eyeTracking)
+    EEG.epoch(i).Gaze_not_incl_NaN = eyeTracking.Gaze_not_incl_NaN(i);
+    EEG.epoch(i).Gaze_incl_NaN = eyeTracking.Gaze_incl_NaN(i);
+    EEG.epoch(i).Fix_insideROI = eyeTracking.Fix_insideROI(i);
+    EEG.epoch(i).Fix_outsideROI = eyeTracking.Fix_outsideROI(i);
 end
 
 %% channel rejection
@@ -323,6 +347,17 @@ figure(2)
 plot(EEG.times, ERP_allChannels, 'LineWidth',2);
 xlim([-500 5000])
 ylim([-5 5])
+
+%% reject epochs based on eye-tracking data
+EEG5 = EEG;
+
+gaze = cell2mat({EEG.epoch.Gaze_not_incl_NaN});
+badEyeTracking = find(gaze == 0); % find the index of the epochs where eye-tracking 
+
+% reject epochs
+if ~isempty(badEyeTracking)
+    EEG5 = pop_rejepoch(EEG5, badEyeTracking, 0);
+end
 
 %% save
 EEG = pop_saveset(EEG, ...
