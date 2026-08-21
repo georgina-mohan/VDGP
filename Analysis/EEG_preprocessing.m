@@ -33,8 +33,8 @@ EEG = pop_loadeep_v4(dataPath);
 EEG = pop_chanedit(EEG, 'lookup','standard_1005.elc'); % add channel locs
 
 %% filter
-EEG = pop_eegfiltnew(EEG, 'locutoff', 0.01); % high pass
-EEG = pop_eegfiltnew(EEG, 'hicutoff', 30); % low pass
+EEG = pop_eegfiltnew(EEG, 'locutoff', 1); % high pass **differs from pre-reg**
+EEG = pop_eegfiltnew(EEG, 'hicutoff', 30); % low pass 
 
 % add notch filter (45 - 55 Hz) **differs from pre-reg**
 EEG = pop_eegfiltnew(EEG, 'locutoff', 45, 'hicutoff', 55, 'revfilt', 1);
@@ -153,13 +153,8 @@ for i = 1:height(eyeTracking)
 end
 
 %% channel rejection
-% using a stricter high-pass filter (1 Hz) to identify bad channels to reject from original dataset
-
-% temp version with higher stricter high-pass filter
-EEG2 = pop_eegfiltnew(EEG, 'locutoff', 1);
-
-EEG2.data = double(EEG2.data); 
-[nChan, nSamples] = size(EEG2.data);
+EEG.data = double(EEG.data); 
+[nChan, nSamples] = size(EEG.data);
 
 thresh = 30; % µV threshold
 pctCutoff = 10; % max % of samples allowed above threshold
@@ -167,24 +162,23 @@ pctCutoff = 10; % max % of samples allowed above threshold
 % calc % of samples over threshold (per channel)
 pctAbove = zeros(nChan,1); % preallocate
 for ch = 1:nChan
-    pctAbove(ch) = sum(abs(EEG2.data(ch,:)) > thresh) ...
+    pctAbove(ch) = sum(abs(EEG.data(ch,:)) > thresh) ...
                    / nSamples * 100;
 end
 
 % find bad channels
 badChanIdx = find(pctAbove > pctCutoff);
-badChanLabels = {EEG2.chanlocs(badChanIdx).labels};
+badChanLabels = {EEG.chanlocs(badChanIdx).labels};
 
 % summary of noisiest channels
 [sortedPct, idx] = sort(pctAbove, 'descend');
 fprintf('\nTop channels by %% of samples > %d µV:\n', thresh);
 for k = 1:min(10, nChan)
-    fprintf('%s: %.2f%%\n', EEG2.chanlocs(idx(k)).labels, sortedPct(k));
+    fprintf('%s: %.2f%%\n', EEG.chanlocs(idx(k)).labels, sortedPct(k));
 end
 
 % remove bad channels
 if ~isempty(badChanLabels)
-    EEG2 = pop_select(EEG2, 'nochannel', badChanLabels);
     EEG = pop_select(EEG, 'nochannel', badChanLabels);
 end
 
@@ -203,17 +197,14 @@ xlim([-500 5000])
 ylim([-10 10])
 
 %% reject very noisy epochs 
-% using a stricter high-pass filter (1 Hz) to identify bad epochs (+/- 200 µV) to reject epochs from original dataset
-
-% identify bad epochs on filtered data
-EEG2 = pop_eegthresh(EEG2, 1, 1:EEG2.nbchan, -200, 200, 0, 5, 0, 1); % reject epochs
+% identify bad epochs
+EEG = pop_eegthresh(EEG, 1, 1:EEG.nbchan, -200, 200, 0, 5, 0, 1); % reject epochs
 
 % save which epochs are rejected
-badEpochs = find(EEG2.reject.rejthresh);
+badEpochs = find(EEG.reject.rejthresh);
 
 % reject epochs
 if ~isempty(badEpochs)
-    EEG2 = pop_rejepoch(EEG2, badEpochs, 0);
     EEG = pop_rejepoch(EEG, badEpochs, 0);
 end
 
@@ -248,9 +239,9 @@ end
 %% ICA
 % temporary high-pass filter (1 Hz) for ICA (following EEGlab guidelines)
 
-EEG3 = pop_eegfiltnew(EEG, 'locutoff', 1); % using a more stringent high-pass filter = better quality ICA
+EEG = pop_eegfiltnew(EEG, 'locutoff', 1); % using a more stringent high-pass filter = better quality ICA
  
-EEG3 = pop_runica(EEG3, ... 
+EEG = pop_runica(EEG, ... 
     'icatype', 'runica', ...
     'extended', 1);
 
@@ -265,36 +256,36 @@ EEG = pop_saveset(EEG, ...
 % 2. ICLabel to classify components
 
 % scalp topogragy
-pop_topoplot(EEG3, 0, 1:20, 'IC Maps', []);
+pop_topoplot(EEG, 0, 1:20, 'IC Maps', []);
 
 % time course
 figure;
-pop_eegplot(EEG3, 0, 1, 1:20); 
+pop_eegplot(EEG, 0, 1, 1:20); 
 
 figure;
-pop_viewprops(EEG3, 0, 1:18, ...
+pop_viewprops(EEG, 0, 1:18, ...
     {'freqrange', [2 50]});
 
 % IClabel:
-EEG3 = pop_iclabel(EEG3, 'default'); % flags components (1 = brain; 2 = muscle; 3 = eye; 4 = heart; 5 = line noise; 6 = other)
+EEG = pop_iclabel(EEG, 'default'); % flags components (1 = brain; 2 = muscle; 3 = eye; 4 = heart; 5 = line noise; 6 = other)
 
 % find components with more than 90% probability of being an artifact
 artifactComponents = find(...
-    EEG3.etc.ic_classification.ICLabel.classifications(:,2) > 0.9 | ... 
-    EEG3.etc.ic_classification.ICLabel.classifications(:,3) > 0.9 | ... 
-    EEG3.etc.ic_classification.ICLabel.classifications(:,4) > 0.9 | ... 
-    EEG3.etc.ic_classification.ICLabel.classifications(:,5) > 0.9 | ... 
-    EEG3.etc.ic_classification.ICLabel.classifications(:,6) > 0.9);     
+    EEG.etc.ic_classification.ICLabel.classifications(:,2) > 0.9 | ... 
+    EEG.etc.ic_classification.ICLabel.classifications(:,3) > 0.9 | ... 
+    EEG.etc.ic_classification.ICLabel.classifications(:,4) > 0.9 | ... 
+    EEG.etc.ic_classification.ICLabel.classifications(:,5) > 0.9 | ... 
+    EEG.etc.ic_classification.ICLabel.classifications(:,6) > 0.9);     
 fprintf('Identified %d bad ICs: %s\n', length(artifactComponents), mat2str(artifactComponents));
 
 % remove components (based on scalp topogragy, time course and ICLabel) 
 badComponents = input('Enter components to remove (e.g., [1 3 5]): ');
 
 % apply ICA weights onto original EEG
-EEG.icawinv = EEG3.icawinv;
-EEG.icasphere = EEG3.icasphere;
-EEG.icaweights = EEG3.icaweights;
-EEG.icachansind = EEG3.icachansind;
+EEG.icawinv = EEG.icawinv;
+EEG.icasphere = EEG.icasphere;
+EEG.icaweights = EEG.icaweights;
+EEG.icachansind = EEG.icachansind;
 
 % remove components from original dataset
 EEG = pop_subcomp(EEG, badComponents, 0);
@@ -315,17 +306,12 @@ ylim([-5 5])
 
 %% reject/interpolate bad channels (epoch-by-epoch)
 
-% temp high-pass filter
-EEG4 = pop_eegfiltnew(EEG, 'locutoff', 1);
-
 % min-max method:
 % flags bad channels within each epoch where amplitude difference is larger than 75 uV
-EEG4 = pop_eegmaxmin(EEG4, ...
+EEG = pop_eegmaxmin(EEG, ...
     'minmaxThresh', '75', ...
     'timeRange', [0  4998] ...
         );
-
-EEG.reject = EEG4.reject;
 
 % trial-by-trial rejection/interpolation (based on flagged channels above)
 EEG = pop_TBT(EEG, ...
@@ -349,14 +335,12 @@ xlim([-500 5000])
 ylim([-5 5])
 
 %% reject epochs based on eye-tracking data
-EEG5 = EEG;
-
 gaze = cell2mat({EEG.epoch.Gaze_not_incl_NaN});
 badEyeTracking = find(gaze == 0); % find the index of the epochs where eye-tracking 
 
 % reject epochs
 if ~isempty(badEyeTracking)
-    EEG5 = pop_rejepoch(EEG5, badEyeTracking, 0);
+    EEG = pop_rejepoch(EEG, badEyeTracking, 0);
 end
 
 %% save
