@@ -314,7 +314,7 @@ EEG = pop_eegmaxmin(EEG, ...
         );
 
 % trial-by-trial rejection/interpolation (based on flagged channels above)
-EEG = pop_TBT(EEG, ...
+[EEG, com, badlist] = pop_TBT(EEG, ...
     EEG.reject.rejmaxminE, ...
     4, ... % max number of bad channel per epoch/trial. If a trial has move than this number of bad channels, the epoch will be removed
     0.3, ... % max % bad epochs/trials per channel. If a channel is bad on more than this percent of the trials, the channel will be removed across the whole dataset.
@@ -444,7 +444,7 @@ for cond = 1:length(triggerlabels)
     title(['FFT spectrum for ' triggerlabels{cond}])
 end
 
-%% save
+%% save FFT data
 participantID = repmat({ID}, length(triggerlabels), 1); 
 conditionTrigger = str2double(string(triggerlabels))';
 EEGAverage = table(participantID, conditionTrigger, ampmatrix', SNRdb_matrix',...
@@ -452,3 +452,23 @@ EEGAverage = table(participantID, conditionTrigger, ampmatrix', SNRdb_matrix',..
 
 savePath = 'C:\Users\gxm449\OneDrive - University of Birmingham\VDGP\Data\Processed\EEG\';
 writetable(EEGAverage, fullfile(savePath, [ID '_average.xlsx']));
+
+%% save pre-processing information
+
+% here I am saving the number of removed channels and epochs, first before
+% ICA:
+badChannels1 = numel(badChanIdx);
+badEpochs1 = numel(badEpochs);
+% and also after using TBT:
+badChannels2 = badlist.nbadchan;
+badEpochs2 = badlist.nbadtrial;
+% and then total:
+badChannelTotal = (badChannels1 + badChannels2);
+badEpochsTotal = (badEpochs1 + badEpochs2);
+
+IDnew = str2double(ID);
+preProcessing = table(IDnew, badChannels1, badEpochs1, badChannels2, badEpochs2, badChannelTotal, badEpochsTotal, ...
+    'VariableNames', {'ParticipantID', 'badChannels1', 'badEpochs1', 'badChannels2', 'badEpochs2', 'badChannelTotal', 'badEpochsTotal'});
+
+savePath = 'C:\Users\gxm449\OneDrive - University of Birmingham\VDGP\Data\Processed\EEG\preProcessed_data';
+writetable(preProcessing, fullfile(savePath, [ID '_preProcessedData.xlsx']));
